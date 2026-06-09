@@ -4,12 +4,14 @@ import { PageCard, PageLayout } from "@/components/PageLayout";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useBill } from "@/lib/bill-context";
+import { createBill } from "@/lib/create-bill";
 import {
   formatCurrency,
   getServiceChargePerPerson,
   getTaxPerPerson,
 } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 function NumberField({
   id,
@@ -79,10 +81,25 @@ function ToggleField({
 
 export default function BillSettingsPage() {
   const router = useRouter();
-  const { settings, updateSettings } = useBill();
+  const { items, settings, updateSettings } = useBill();
+  const [isSaving, setIsSaving] = useState(false);
 
   const taxPerPerson = getTaxPerPerson(settings);
   const servicePerPerson = getServiceChargePerPerson(settings);
+
+  async function handleContinue() {
+    try {
+      setIsSaving(true);
+      const { bill, items: createdItems } = await createBill(items, settings);
+      console.log("Created bill:", bill);
+      console.log("Created items:", createdItems);
+      router.push("/share");
+    } catch (error) {
+      console.error("Failed to create bill:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <PageLayout
@@ -167,7 +184,9 @@ export default function BillSettingsPage() {
           )}
       </Card>
 
-      <Button onClick={() => router.push("/share")}>Continue</Button>
+      <Button onClick={() => void handleContinue()} disabled={isSaving}>
+        {isSaving ? "Saving..." : "Continue"}
+      </Button>
     </PageLayout>
   );
 }

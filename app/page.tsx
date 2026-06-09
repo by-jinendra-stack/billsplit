@@ -1,3 +1,6 @@
+"use client";
+
+import { testSupabaseConnection } from "@/lib/test-supabase-connection";
 import Link from "next/link";
 
 const steps = [
@@ -40,6 +43,14 @@ export default function Home() {
         >
           Upload Bill
         </Link>
+
+        <button
+          type="button"
+          onClick={() => void testSupabaseConnection()}
+          className="mt-4 rounded-full border border-zinc-300 px-8 py-3.5 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+        >
+          Test Supabase
+        </button>
 
         <section className="mt-16 w-full">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
