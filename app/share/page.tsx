@@ -1,14 +1,23 @@
 "use client";
 
+import { PageCard, PageLayout } from "@/components/PageLayout";
+import { Button } from "@/components/ui/Button";
+import { SHARE_CODE } from "@/lib/constants";
+import { useBill } from "@/lib/bill-context";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const SHARE_CODE = "ABC123";
 const SHARE_LINK = `localhost:3000/join/${SHARE_CODE}`;
 
 export default function SharePage() {
   const router = useRouter();
+  const { participants, settings } = useBill();
   const [copied, setCopied] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const joinedCount = participants.length;
+  const totalParticipants = settings.numberOfParticipants;
+  const waitingCount = Math.max(0, totalParticipants - joinedCount);
 
   async function handleCopyLink() {
     try {
@@ -20,47 +29,79 @@ export default function SharePage() {
     }
   }
 
+  function handleRefresh() {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 600);
+  }
+
   return (
-    <div className="flex min-h-full flex-1 flex-col items-center bg-zinc-50 px-6 py-12 font-sans dark:bg-zinc-950 sm:py-16">
-      <main className="w-full max-w-lg">
-        <h1 className="text-center text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
-          Share Bill
-        </h1>
-
-        <div className="mt-10 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="text-center">
-            <p className="text-sm font-medium uppercase tracking-wider text-zinc-500">
-              Share code
-            </p>
-            <p className="mt-2 text-3xl font-bold tracking-widest text-zinc-900 dark:text-zinc-50">
-              {SHARE_CODE}
-            </p>
-          </div>
-
-          <div className="mt-8 border-t border-zinc-100 pt-6 dark:border-zinc-800">
-            <p className="text-sm font-medium text-zinc-500">Share link</p>
-            <p className="mt-2 break-all rounded-lg bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-              {SHARE_LINK}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="mt-6 w-full rounded-full border border-zinc-300 py-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-          >
-            {copied ? "Copied!" : "Copy Link"}
-          </button>
+    <PageLayout
+      step="share"
+      title="Share Bill"
+      subtitle="Send this link so friends can join and select their items"
+    >
+      <PageCard>
+        <div className="text-center">
+          <p className="text-sm font-medium uppercase tracking-wider text-zinc-500">
+            Share code
+          </p>
+          <p className="mt-2 text-3xl font-bold tracking-widest text-zinc-900 dark:text-zinc-50">
+            {SHARE_CODE}
+          </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => router.push(`/join/${SHARE_CODE}`)}
-          className="mt-8 w-full rounded-full bg-zinc-900 px-8 py-3.5 text-base font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          Continue
-        </button>
-      </main>
-    </div>
+        <div className="mt-6 border-t border-zinc-100 pt-6 dark:border-zinc-800">
+          <p className="text-sm font-medium text-zinc-500">Share link</p>
+          <p className="mt-2 break-all rounded-lg bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+            {SHARE_LINK}
+          </p>
+        </div>
+
+        <div className="mt-4 flex gap-3">
+          <Button variant="secondary" className="flex-1" onClick={handleCopyLink}>
+            {copied ? "Copied!" : "Copy Link"}
+          </Button>
+          <Button
+            variant="secondary"
+            className="flex-1"
+            onClick={handleRefresh}
+          >
+            {refreshing ? "Refreshing..." : "Refresh"}
+          </Button>
+        </div>
+      </PageCard>
+
+      <PageCard>
+        <p className="text-sm font-medium text-zinc-500">
+          Participants Joined
+        </p>
+        <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+          {joinedCount} / {totalParticipants}
+        </p>
+
+        <ul className="mt-4 space-y-2">
+          {participants.map((participant) => (
+            <li
+              key={participant.id}
+              className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300"
+            >
+              <span className="text-emerald-600 dark:text-emerald-400">✓</span>
+              <span className="font-medium">{participant.name}</span>
+            </li>
+          ))}
+        </ul>
+
+        {waitingCount > 0 && (
+          <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+            Waiting for {waitingCount} more participant
+            {waitingCount === 1 ? "" : "s"}...
+          </p>
+        )}
+      </PageCard>
+
+      <Button onClick={() => router.push(`/join/${SHARE_CODE}`)}>
+        Continue
+      </Button>
+    </PageLayout>
   );
 }
