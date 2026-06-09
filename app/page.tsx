@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const steps = [
   {
     number: "1",
@@ -32,12 +34,12 @@ export default function Home() {
           Split restaurant and grocery bills in minutes
         </p>
 
-        <button
-          type="button"
+        <Link
+          href="/upload"
           className="mt-10 rounded-full bg-zinc-900 px-8 py-3.5 text-base font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           Upload Bill
-        </button>
+        </Link>
 
         <section className="mt-16 w-full">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
